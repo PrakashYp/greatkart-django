@@ -5,7 +5,7 @@ from carts.views import _cart_id
 from django.http import HttpResponse
 from carts.models import CartItem
 from django.db.models import Q
-from .models import ReviewRating
+from .models import ReviewRating,ProductGallery
 from .forms import ReviewForm
 from django.contrib import messages
 from orders.models import OrderProduct
@@ -56,6 +56,9 @@ def product_detail(request,category_slug, product_slug):
     # Get the REviews
 
     reviews = ReviewRating.objects.filter(product_id = single_product.id,status = True)
+    
+    # Get the Product Gallery
+    product_gallery = ProductGallery.objects.filter(product_id=single_product.id)
 
 
     context = {
@@ -63,6 +66,7 @@ def product_detail(request,category_slug, product_slug):
         'in_cart':in_cart,
         'orderproduct':orderproduct,
         'reviews': reviews,
+        'product_gallery':product_gallery,
     }
     return render(request, 'store/product_detail.html', context)
     
