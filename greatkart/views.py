@@ -1,4 +1,4 @@
-from django.http import JsonResponse
+from django.http import JsonResponse,HttpResponse
 from django.shortcuts import render
 
 from store.models import Product, ReviewRating
@@ -7,10 +7,8 @@ from store.models import Product, ReviewRating
 
 def home(request):
     products = Product.objects.filter(is_available=True).order_by('-created_date')
-    reviews = ReviewRating.objects.none()
+    reviews = ReviewRating.objects.filter(status=True)
 
-    for product in products:
-        reviews = ReviewRating.objects.filter(product_id=product.id, status=True)
     context = {
         'products': products,
         'reviews': reviews,
@@ -19,4 +17,4 @@ def home(request):
 
 
 def health(request):
-    return JsonResponse({'status': 'ok'})
+    return HttpResponse("OK")
