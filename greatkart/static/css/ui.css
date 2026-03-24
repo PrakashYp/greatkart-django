@@ -319,12 +319,10 @@ article:after,
 }
 
 .bg-pattern {
-  background-image: url(../images/banners/bg-pattern.svg), linear-gradient(135deg, #3167eb, #545454);
-  background-size: cover, auto;
-  background-repeat: no-repeat, repeat;
-  background-position: 0px 0px, 50% 50%;
+  background-image: linear-gradient(135deg, #3167eb, #545454);
+  background-size: cover;
+  background-repeat: no-repeat;
 }
-
 .bg-img {
   overflow: hidden;
   background-color: #ddd;

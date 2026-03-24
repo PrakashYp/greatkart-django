@@ -148,16 +148,20 @@ def activate(request,uidb64, token):
         messages.error(request, 'Invalid activation link')
         return redirect('register')
     
-
 @login_required(login_url='login')
 def dashboard(request):
-    orders = Order.objects.order_by('-created_at').filter(user_id=request.user.id, is_ordered=True)
+    orders = Order.objects.order_by('-created_at').filter(
+        user_id=request.user.id,
+        is_ordered=True
+    )
     orders_count = orders.count()
 
-    userprofile = UserProfile.objects.get(user_id=request.user.id)
+    userprofile, created = UserProfile.objects.get_or_create(user=request.user)
+
     context = {
         'orders_count': orders_count,
         'userprofile': userprofile,
+        'created':created,
     }
     return render(request, 'accounts/dashboard.html', context)
 
@@ -170,7 +174,7 @@ def forgotPassword(request):
             #Reset password email
             current_site = get_current_site(request)
             mail_subject = 'Reset Your Password'
-            message = render_to_string('accounts/reset_password_email.html',{
+            message = render_to_string('accounts/reset_password_email.html',{ 
                 'user':user,
                 'domain': current_site,
                 'uid': urlsafe_base64_encode(force_bytes(user.pk)),
