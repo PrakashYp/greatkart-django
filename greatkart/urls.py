@@ -22,7 +22,7 @@ from django.conf import settings
 
 urlpatterns = [
     path('securelogin/', admin.site.urls),
-    path('', views.health, name='home'),
+    path('', views.home, name='home'),
     path('health/', views.health, name='health'),
     path('store/', include('store.urls')),
     path('cart/', include('carts.urls')),

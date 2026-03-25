@@ -13,11 +13,11 @@ BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
 
 
 # SECURITY
-SECRET_KEY = '52$5ujr925j_8)+c4+yhwik_+vq6e13#fxi5**_$rv80pn3(sf'
+SECRET_KEY = ' 52$5ujr925j_8)+c4+yhwik_+vq6e13#fxi5**_$rv80pn3(sf'
 
 DEBUG = False
 
-ALLOWED_HOSTS = ['django-env.eba-xwfjcs38.us-west-2.elasticbeanstalk.com']
+ALLOWED_HOSTS = ['django-env.eba-xwfjcs38.us-west-2.elasticbeanstalk.com','*']
 
 
 # Application definition
