@@ -17,4 +17,4 @@ def home(request):
 
 
 def health(request):
-    return JsonResponse({'status': 'ok'})
+    return HttpResponse("OK")
