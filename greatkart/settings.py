@@ -17,7 +17,7 @@ SECRET_KEY = '52$5ujr925j_8)+c4+yhwik_+vq6e13#fxi5**_$rv80pn3(sf'
 
 DEBUG = False
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['django-env.eba-xwfjcs38.us-west-2.elasticbeanstalk.com']
 
 
 # Application definition
@@ -61,8 +61,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                # 'category.context_processors.menu_links',
-                # 'carts.context_processors.counters',
+                'category.context_processors.menu_links',
+                'carts.context_processors.counters',
             ],
         },
     },
