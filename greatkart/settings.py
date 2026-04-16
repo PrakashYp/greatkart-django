@@ -117,7 +117,7 @@ STATICFILES_DIRS = [
     BASE_DIR / 'greatkart/static',
 ]
 
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 
 # Media files
