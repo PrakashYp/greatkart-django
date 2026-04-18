@@ -18,22 +18,39 @@ from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from django.utils.encoding import force_bytes
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import EmailMessage
+from urllib.parse import parse_qs, urlparse
 
 # Create your views here.
 
+
+def _generate_username_from_email(email):
+    base_username = email.split("@")[0]
+    username = base_username
+    suffix = 1
+
+    while Account.objects.filter(username=username).exists():
+        username = f"{base_username}{suffix}"
+        suffix += 1
+
+    return username
+
 def register(request):
+    if request.user.is_authenticated:
+        return redirect('dashboard')
+
     if request.method == 'POST':
         form = RegistrationForm(request.POST)
         if form.is_valid():
             first_name   = form.cleaned_data['first_name']
             last_name    = form.cleaned_data['last_name']
             phone_number = form.cleaned_data['phone_number']
-            email        = form.cleaned_data['email']
+            email        = form.cleaned_data['email'].lower()
             password     = form.cleaned_data['password']
-            username     = email.split("@")[0]
+            username     = _generate_username_from_email(email)
             user = Account.objects.create_user(first_name=first_name,last_name=last_name,email=email,username=username,password = password)
             user.phone_number = phone_number
             user.save()
+            UserProfile.objects.get_or_create(user=user)
 
             #USER ACTIVATION
 
@@ -49,7 +66,6 @@ def register(request):
             to_email = email
             send_email = EmailMessage(mail_subject, message, to= [to_email])
             send_email.send()
-            # messages.success(request, 'Thank you for registering with us. We have sent you a verification email to your email address. Please verify it')
             return redirect('/accounts/login/?command=verification&email='+email)
     else:
         form = RegistrationForm()
@@ -59,9 +75,12 @@ def register(request):
     return render(request,'accounts/register.html',context)
 
 def login(request):
+    if request.user.is_authenticated:
+        return redirect('dashboard')
+
     if request.method == 'POST':
-        email = request.POST['email']
-        password = request.POST['password']
+        email = request.POST.get('email', '').strip().lower()
+        password = request.POST.get('password', '')
 
         user = auth.authenticate(email=email,password = password)
 
@@ -108,18 +127,17 @@ def login(request):
             auth.login(request,user)
             messages.success(request, "You are Now Logged in.")
             url = request.META.get('HTTP_REFERER')
-            try:
-                query = requests.utils.urlparse(url).query
-                # next=/cart/checkout/
-                params = dict(x.split('=') for x in query.split('&'))
-                if 'next' in params:
-                    nextPage = params['next']
-                    return redirect(nextPage)
-                
-            except:
-                return redirect('dashboard')
+            if url:
+                next_page = parse_qs(urlparse(url).query).get('next')
+                if next_page:
+                    return redirect(next_page[0])
+            return redirect('dashboard')
         else:
-            messages.error(request, "Invalid Login credentials")
+            existing_user = Account.objects.filter(email=email).first()
+            if existing_user and existing_user.check_password(password) and not existing_user.is_active:
+                messages.error(request, "Your account is not active yet. Please verify your email before signing in.")
+            else:
+                messages.error(request, "Invalid login credentials.")
             return redirect('login')
     return render(request,'accounts/login.html')
 
@@ -230,6 +248,7 @@ def resetPassword(request):
         return render(request,'accounts/resetPassword.html')
 
 
+@login_required(login_url='login')
 def my_orders(request):
     orders = Order.objects.filter(user=request.user, is_ordered=True).order_by('-created_at')
     context= {
@@ -245,7 +264,7 @@ def my_orders(request):
 #         profile_form = UserProfileForm(request.POST,request.FILES,instance=userprofile)
 #     return render(request,'accounts/edit_profile.html')
 
-
+@login_required(login_url='login')
 def edit_profile(request):
     userprofile = get_object_or_404(UserProfile, user=request.user)
     if request.method == 'POST':
@@ -294,8 +313,8 @@ def change_password(request):
 
 @login_required(login_url='login')
 def order_detail(request, order_id):
-    order_detail = OrderProduct.objects.filter(order__order_number=order_id)
-    order = Order.objects.get(order_number=order_id)
+    order_detail = OrderProduct.objects.filter(order__order_number=order_id, user=request.user)
+    order = get_object_or_404(Order, order_number=order_id, user=request.user)
     subtotal = 0
     for i in order_detail:
         subtotal += i.product_price * i.quantity
@@ -306,7 +325,6 @@ def order_detail(request, order_id):
         'subtotal': subtotal,
     }
     return render(request, 'accounts/order_detail.html', context)
-
 
 
 

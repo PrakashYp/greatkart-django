@@ -1,12 +1,19 @@
 from django.contrib import admin
 from .models import Product,Variation,ReviewRating,ProductGallery
-import admin_thumbnails
+
+try:
+    import admin_thumbnails
+except ImportError:
+    admin_thumbnails = None
 # Register your models here.
 
-@admin_thumbnails.thumbnail('image')
 class ProductGalleryInline(admin.TabularInline):
     model = ProductGallery
     extra = 1
+
+
+if admin_thumbnails is not None:
+    ProductGalleryInline = admin_thumbnails.thumbnail('image')(ProductGalleryInline)
 
 
 
@@ -27,7 +34,6 @@ admin.site.register(Product,ProductAdmin)
 admin.site.register(Variation,VariationAdmin)
 admin.site.register(ReviewRating)
 admin.site.register(ProductGallery)
-
 
 
 
